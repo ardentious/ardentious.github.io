@@ -1,21 +1,410 @@
 <!DOCTYPE html>
-<html class="no-js" lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
-   <title>ardentious.github.io</title>
-   <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
-   <link href="css/ardentious.css" rel="stylesheet" type="text/css">
-   <meta charset="UTF-8">
-   <meta content="David Webber" name="author">
-   <meta content="ardentious" name="description">
-   <meta content="HTML,CSS,JavaScript" name="keywords">
-   <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive E-Bike Guide for Alberton, MT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f4f0;
+            color: #374151;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 500px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 450px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover {
+            color: #4f46e5;
+        }
+        .active-tab {
+            border-bottom: 2px solid #4f46e5;
+            color: #4f46e5;
+            font-weight: 600;
+        }
+        .inactive-tab {
+            border-bottom: 2px solid transparent;
+        }
+        .decision-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        .decision-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .highlight-selection {
+            outline: 3px solid #4f46e5;
+            outline-offset: 2px;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+    </style>
 </head>
-<body>
-   <h1>ardentious.github.io</h1>
-   <h2>ardentious.github.io</h2>
-   <h3>ardentious.github.io</h3>
-   <h4>ardentious.github.io</h4>
-   <h5>ardentious.github.io</h5>
-   <h6>ardentious.github.io</h6>
+<body class="bg-gray-50">
+
+    <nav id="navbar" class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="text-xl font-bold text-gray-800">E-Bike Guide</div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#dashboard" class="nav-link text-gray-600">Decision Dashboard</a>
+                    <a href="#rules" class="nav-link text-gray-600">Rules of the Road</a>
+                    <a href="#models" class="nav-link text-gray-600">Top Contenders</a>
+                    <a href="#toolkit" class="nav-link text-gray-600">Adventure Toolkit</a>
+                </div>
+                <div class="md:hidden">
+                    <button id="menu-btn" class="text-gray-800 focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#dashboard" class="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-100">Decision Dashboard</a>
+            <a href="#rules" class="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-100">Rules of the Road</a>
+            <a href="#models" class="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-100">Top Contenders</a>
+            <a href="#toolkit" class="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-100">Adventure Toolkit</a>
+        </div>
+    </nav>
+
+    <header class="bg-white">
+        <div class="container mx-auto px-4 py-16 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900">Your E-Bike Gateway to Alberton & Beyond</h1>
+            <p class="text-lg text-gray-600 mt-4 max-w-3xl mx-auto">This interactive guide is tailored to your mission: finding the perfect "price is no object" e-bike for commuting, photography, and exploring the stunning landscapes of Lolo National Forest.</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+
+        <section id="dashboard" class="py-12">
+            <h2 class="text-3xl font-bold text-center mb-2 text-gray-900">Decision Dashboard</h2>
+            <p class="text-center text-gray-600 mb-10 max-w-2xl mx-auto">The performance, feel, and legality of your ride come down to a few key choices. Interact with the cards below to understand the fundamentals.</p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                <div class="bg-white rounded-lg shadow-lg p-6 space-y-6">
+                    <h3 class="text-2xl font-bold mb-4 text-center">Sensor Showdown: The Heart of the Ride</h3>
+                    <p class="text-sm text-center text-gray-500 -mt-4">The sensor dictates how the motor responds to you. For precise trail control and photography, your choice matters.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div id="torque-card" class="decision-card border-2 border-transparent p-4 rounded-lg text-center bg-gray-50">
+                            <h4 class="font-bold text-lg text-indigo-600">Torque Sensor</h4>
+                            <p class="text-4xl my-3">💪</p>
+                            <p class="text-sm">Measures your effort. The harder you pedal, the more power you get. It's an intuitive, seamless amplification of your own strength.</p>
+                        </div>
+                        <div id="cadence-card" class="decision-card border-2 border-transparent p-4 rounded-lg text-center bg-gray-50">
+                            <h4 class="font-bold text-lg text-gray-600">Cadence Sensor</h4>
+                            <p class="text-4xl my-3">🔄</p>
+                            <p class="text-sm">Detects if pedals are moving, then gives a set amount of power. Can feel like an on/off switch.</p>
+                        </div>
+                    </div>
+                    <button id="sensor-recommendation-btn" class="w-full bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700 transition">Which is right for me?</button>
+                    <p id="sensor-recommendation-text" class="hidden text-center text-indigo-700 font-semibold p-3 bg-indigo-50 rounded-lg">A <span class="font-bold">Torque Sensor</span> is highly recommended for its precise control—perfect for navigating trails and setting up photos.</p>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-center">Class Comparison</h3>
+                    <p class="text-sm text-center text-gray-500 -mt-4">Classes define speed limits and throttle rules. Click each class to see the details.</p>
+                    <div id="class-diagram" class="space-y-4 pt-4">
+                        <div data-class="1" class="decision-card p-4 rounded-lg border-2 border-gray-200">
+                            <h4 class="font-bold text-lg">Class 1: Pedal-Assist</h4>
+                            <p class="text-sm text-gray-600">Motor helps only when you pedal. Max speed: <span class="font-bold">20 mph</span>. No throttle.</p>
+                        </div>
+                        <div data-class="2" class="decision-card p-4 rounded-lg border-2 border-gray-200">
+                            <h4 class="font-bold text-lg">Class 2: Throttle on Demand</h4>
+                            <p class="text-sm text-gray-600">Has a throttle, and helps when you pedal. Max speed: <span class="font-bold">20 mph</span>.</p>
+                        </div>
+                        <div data-class="3" class="decision-card p-4 rounded-lg border-2 border-gray-200">
+                            <h4 class="font-bold text-lg">Class 3: Speed</h4>
+                            <p class="text-sm text-gray-600">Motor helps when you pedal. Max speed: <span class="font-bold">28 mph</span>. Throttle (if present) usually capped at 20 mph.</p>
+                        </div>
+                    </div>
+                    <p id="class-recommendation-text" class="hidden text-center text-indigo-700 font-semibold mt-4 p-3 bg-indigo-50 rounded-lg">Your ideal bike is a configurable <span class="font-bold">Class 2/3</span> model, giving you 28 mph pedal-assist for speed and a 20 mph throttle for convenience.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="rules" class="py-12 bg-gray-100 -mx-4 px-4">
+            <h2 class="text-3xl font-bold text-center mb-2 text-gray-900">Rules of the Road & Trail</h2>
+            <p class="text-center text-gray-600 mb-10 max-w-2xl mx-auto">Responsible riding means knowing the law. Your e-bike is subject to different rules on state roads versus federal forest land.</p>
+            <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
+                <div class="border-b border-gray-200 mb-6">
+                    <nav class="flex space-x-4" aria-label="Tabs">
+                        <button id="tab-mt" class="tab-btn active-tab py-4 px-1 text-sm font-medium">Montana Roads</button>
+                        <button id="tab-lolo" class="tab-btn inactive-tab py-4 px-1 text-sm font-medium">Lolo National Forest</button>
+                    </nav>
+                </div>
+                <div id="content-mt">
+                    <ul class="space-y-4">
+                        <li class="flex items-start"><span class="text-2xl mr-3 text-green-500">✔️</span><span><span class="font-bold">No License Required:</span> You do not need a driver's license, registration, or insurance for your e-bike in Montana.</span></li>
+                        <li class="flex items-start"><span class="text-2xl mr-3 text-green-500">✔️</span><span><span class="font-bold">General Access:</span> E-bikes are typically allowed on roads and paths where traditional bikes go.</span></li>
+                        <li class="flex items-start"><span class="text-2xl mr-3 text-yellow-500">⚠️</span><span><span class="font-bold">Evolving Laws:</span> Montana is considering formally adopting the 3-class system. A configurable bike ensures you can adapt to any new regulations.</span></li>
+                    </ul>
+                </div>
+                <div id="content-lolo" class="hidden">
+                    <div class="p-4 bg-red-50 border-l-4 border-red-500 text-red-700 mb-4 rounded-r-lg">
+                        <p class="font-bold">Critical Distinction: E-bikes are considered MOTORIZED vehicles on National Forest land.</p>
+                    </div>
+                    <ul class="space-y-4">
+                        <li class="flex items-start"><span class="text-2xl mr-3 text-green-500">🗺️</span><span><span class="font-bold">MVUM is Law:</span> You can ONLY ride on roads and trails designated open to motor vehicles on the official Motor Vehicle Use Map (MVUM).</span></li>
+                        <li class="flex items-start"><span class="text-2xl mr-3 text-red-500">❌</span><span><span class="font-bold">"Casual Trails" Are Likely Off-Limits:</span> If a trail is not on the MVUM as motorized, it is prohibited. This includes hiking trails, game trails, and Wilderness areas.</span></li>
+                        <li class="flex items-start"><span class="text-2xl mr-3 text-blue-500">🐻</span><span><span class="font-bold">Be Prepared:</span> Always download MVUMs for offline use (Avenza Maps app), and be Bear Aware.</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="models" class="py-12">
+            <h2 class="text-3xl font-bold text-center mb-2 text-gray-900">Top Contenders Comparison</h2>
+            <p class="text-center text-gray-600 mb-10 max-w-2xl mx-auto">We've analyzed the market based on your needs. Below, compare key performance metrics for top-tier options. A "Hardtail" has front suspension, while "Full Suspension" has front and rear for ultimate comfort.</p>
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div class="chart-container">
+                    <canvas id="bikeChart"></canvas>
+                </div>
+                <div class="mt-8 overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="p-3 font-semibold text-sm">Feature</th>
+                                <th class="p-3 font-semibold text-sm text-center">Aventon Aventure.2</th>
+                                <th class="p-3 font-semibold text-sm text-center">Lectric XPeak 2.0</th>
+                                <th class="p-3 font-semibold text-sm text-center">Premium Full Suspension</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="hover:bg-gray-50">
+                                <td class="p-3 border-b border-gray-200 font-medium">Sensor Type</td>
+                                <td class="p-3 border-b border-gray-200 text-center text-green-600 font-bold">Torque</td>
+                                <td class="p-3 border-b border-gray-200 text-center text-green-600 font-bold">Torque</td>
+                                <td class="p-3 border-b border-gray-200 text-center text-green-600 font-bold">High-End Torque</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="p-3 border-b border-gray-200 font-medium">Class Config</td>
+                                <td class="p-3 border-b border-gray-200 text-center">Via App</td>
+                                <td class="p-3 border-b border-gray-200 text-center">Via Display</td>
+                                <td class="p-3 border-b border-gray-200 text-center">Advanced App Control</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="p-3 border-b border-gray-200 font-medium">Throttle</td>
+                                <td class="p-3 border-b border-gray-200 text-center">✔️ Yes</td>
+                                <td class="p-3 border-b border-gray-200 text-center">✔️ Yes</td>
+                                <td class="p-3 border-b border-gray-200 text-center">⚠️ Model Dependent</td>
+                            </tr>
+                             <tr class="hover:bg-gray-50">
+                                <td class="p-3 font-medium">Best For</td>
+                                <td class="p-3 text-center text-sm">Excellent all-around performance and robust app features.</td>
+                                <td class="p-3 text-center text-sm">Powerful motor and great value for an all-terrain ride.</td>
+                                <td class="p-3 text-center text-sm">Ultimate comfort and control on the most rugged forest trails.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="toolkit" class="py-12 bg-gray-100 -mx-4 px-4">
+            <h2 class="text-3xl font-bold text-center mb-2 text-gray-900">Your Adventure Toolkit</h2>
+             <p class="text-center text-gray-600 mb-10 max-w-2xl mx-auto">The right gear makes every ride safer and more enjoyable. Here are the essentials for your Alberton explorations.</p>
+            <div class="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 text-center">
+                <div class="bg-white p-4 rounded-lg shadow-md flex flex-col items-center justify-center">
+                    <p class="text-5xl mb-2">⛑️</p>
+                    <p class="font-bold">Helmet</p>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-md flex flex-col items-center justify-center">
+                    <p class="text-5xl mb-2">📸</p>
+                    <p class="font-bold">Gear Bag</p>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-md flex flex-col items-center justify-center">
+                    <p class="text-5xl mb-2">📱</p>
+                    <p class="font-bold">Phone Mount</p>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-md flex flex-col items-center justify-center">
+                    <p class="text-5xl mb-2">🛠️</p>
+                    <p class="font-bold">Repair Kit</p>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-md flex flex-col items-center justify-center">
+                    <p class="text-5xl mb-2">🐻</p>
+                    <p class="font-bold">Bear Spray</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="text-center p-6 mt-8 bg-gray-800 text-white">
+        <p>This interactive guide was generated to empower your e-bike decision.</p>
+        <p class="text-xs text-gray-400 mt-2">Always ride responsibly and confirm local regulations before exploring.</p>
+    </footer>
+
+    <script>
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        const tabMt = document.getElementById('tab-mt');
+        const tabLolo = document.getElementById('tab-lolo');
+        const contentMt = document.getElementById('content-mt');
+        const contentLolo = document.getElementById('content-lolo');
+
+        tabMt.addEventListener('click', () => {
+            tabMt.classList.add('active-tab');
+            tabMt.classList.remove('inactive-tab');
+            tabLolo.classList.remove('active-tab');
+            tabLolo.classList.add('inactive-tab');
+            contentMt.classList.remove('hidden');
+            contentLolo.classList.add('hidden');
+        });
+
+        tabLolo.addEventListener('click', () => {
+            tabLolo.classList.add('active-tab');
+            tabLolo.classList.remove('inactive-tab');
+            tabMt.classList.remove('active-tab');
+            tabMt.classList.add('inactive-tab');
+            contentLolo.classList.remove('hidden');
+            contentMt.classList.add('hidden');
+        });
+
+        const sensorRecoBtn = document.getElementById('sensor-recommendation-btn');
+        const sensorRecoText = document.getElementById('sensor-recommendation-text');
+        const torqueCard = document.getElementById('torque-card');
+        sensorRecoBtn.addEventListener('click', () => {
+            sensorRecoText.classList.remove('hidden');
+            torqueCard.classList.add('highlight-selection');
+        });
+        
+        const classDiagram = document.getElementById('class-diagram');
+        const classRecoText = document.getElementById('class-recommendation-text');
+        const classCards = classDiagram.querySelectorAll('.decision-card');
+        classCards.forEach(card => {
+            card.addEventListener('click', () => {
+                classCards.forEach(c => c.classList.remove('highlight-selection'));
+                card.classList.add('highlight-selection');
+                if(card.dataset.class === '3') {
+                   classRecoText.classList.remove('hidden');
+                }
+            });
+        });
+
+        function wrapLabel(str, max_width) {
+            if (str.length <= max_width) {
+                return str;
+            }
+            const words = str.split(' ');
+            let lines = [];
+            let current_line = '';
+            for (const word of words) {
+                if ((current_line + ' ' + word).length > max_width && current_line.length > 0) {
+                    lines.push(current_line);
+                    current_line = word;
+                } else {
+                    if (current_line.length > 0) {
+                        current_line += ' ' + word;
+                    } else {
+                        current_line = word;
+                    }
+                }
+            }
+            lines.push(current_line);
+            return lines;
+        }
+
+        const bikeLabels = [
+            wrapLabel('Aventon Aventure.2 (Hardtail)', 16),
+            wrapLabel('Lectric XPeak 2.0 (Hardtail)', 16),
+            wrapLabel('Premium Full Suspension', 16)
+        ];
+
+        const ctx = document.getElementById('bikeChart').getContext('2d');
+        const bikeChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: bikeLabels,
+                datasets: [{
+                    label: 'Motor Torque (Nm)',
+                    data: [80, 75, 90],
+                    backgroundColor: 'rgba(79, 70, 229, 0.8)',
+                    borderColor: 'rgba(79, 70, 229, 1)',
+                    borderWidth: 1
+                }, {
+                    label: 'Battery Capacity (Wh)',
+                    data: [720, 672, 750],
+                    backgroundColor: 'rgba(30, 64, 175, 0.7)',
+                    borderColor: 'rgba(30, 64, 175, 1)',
+                    borderWidth: 1
+                },{
+                    label: 'Suspension Travel (mm)',
+                    data: [80, 80, 140],
+                    backgroundColor: 'rgba(219, 39, 119, 0.7)',
+                    borderColor: 'rgba(219, 39, 119, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#e5e7eb'
+                        },
+                        ticks: {
+                            color: '#4b5563'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#4b5563',
+                            maxRotation: 0,
+                            minRotation: 0
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            color: '#1f2937'
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                const item = tooltipItems[0];
+                                let label = item.chart.data.labels[item.dataIndex];
+                                if (Array.isArray(label)) {
+                                    return label.join(' ');
+                                } else {
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 </html>

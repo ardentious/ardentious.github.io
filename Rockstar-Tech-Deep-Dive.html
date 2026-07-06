@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rockstar Advanced Technology Deep Dive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-main: #fcfaf7;
+            --accent-blue: #1e3a8a;
+            --accent-gold: #b45309;
+            --text-dark: #1f2937;
+        }
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-dark);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(229, 231, 235, 0.5);
+        }
+        .tech-tab.active {
+            border-bottom: 3px solid var(--accent-gold);
+            color: var(--accent-gold);
+        }
+        .causal-node:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center">
+                    <span class="text-2xl font-bold tracking-tighter text-gray-900">RAGE<span class="text-amber-600">TECH</span></span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <button onclick="scrollToSection('engine')" class="text-sm font-medium hover:text-amber-600 transition">Engine Core</button>
+                    <button onclick="scrollToSection('subsystems')" class="text-sm font-medium hover:text-amber-600 transition">Subsystems</button>
+                    <button onclick="scrollToSection('simulation')" class="text-sm font-medium hover:text-amber-600 transition">Simulation</button>
+                    <button onclick="scrollToSection('global')" class="text-sm font-medium hover:text-amber-600 transition">Global Architecture</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+        
+        <!-- Hero Section -->
+        <header class="text-center mb-20">
+            <h1 class="text-5xl md:text-6xl font-extrabold text-gray-900 mb-6 tracking-tight">
+                The Global Architecture of <br><span class="text-amber-600 underline decoration-gray-300">Rockstar Games</span>
+            </h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                An interactive exploration into the Rockstar Advanced Game Engine (RAGE), the proprietary subsystems fueling $2.5 billion productions, and the global matrix of 5,000+ developers behind Grand Theft Auto VI.
+            </p>
+        </header>
+
+        <!-- Section 1: The Engine Core -->
+        <section id="engine" class="mb-24 scroll-mt-20">
+            <div class="bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-gray-100">
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h2 class="text-3xl font-bold mb-4">Independence Through RAGE</h2>
+                        <p class="text-gray-600 mb-6">
+                            Born from a defensive pivot in 2004 when EA acquired the RenderWare engine, the <strong>RAGE Technology Group</strong> (San Diego) was formed to ensure technological sovereignty. RAGE is a proprietary C++ framework hyper-optimized for massive, physics-heavy open worlds.
+                        </p>
+                        <div class="space-y-4">
+                            <div class="flex items-start gap-4 p-4 rounded-xl bg-amber-50 border border-amber-100">
+                                <span class="text-2xl">🛡️</span>
+                                <div>
+                                    <h4 class="font-bold text-amber-900">Operational Independence</h4>
+                                    <p class="text-sm text-amber-800">Complete control over the "DNA" of game worlds, avoiding reliance on competitors like EA or Epic Games.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-4 p-4 rounded-xl bg-blue-50 border border-blue-100">
+                                <span class="text-2xl">🏎️</span>
+                                <div>
+                                    <h4 class="font-bold text-blue-900">The Forza Pipeline</h4>
+                                    <p class="text-sm text-blue-800">Acquisition of Dhruva Interactive internalized high-fidelity automotive modeling formerly used in Microsoft's Forza series.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-6 rounded-2xl bg-gray-50 text-center border border-gray-200">
+                            <div class="text-4xl mb-2">⚙️</div>
+                            <h3 class="font-bold text-lg">C++</h3>
+                            <p class="text-xs text-gray-500 uppercase tracking-widest">Base Language</p>
+                        </div>
+                        <div class="p-6 rounded-2xl bg-gray-50 text-center border border-gray-200">
+                            <div class="text-4xl mb-2">🏗️</div>
+                            <h3 class="font-bold text-lg">RIDGE</h3>
+                            <p class="text-xs text-gray-500 uppercase tracking-widest">Technology Group</p>
+                        </div>
+                        <div class="p-6 rounded-2xl bg-gray-50 text-center border border-gray-200">
+                            <div class="text-4xl mb-2">💎</div>
+                            <h3 class="font-bold text-lg">PBR</h3>
+                            <p class="text-xs text-gray-500 uppercase tracking-widest">Rendering Model</p>
+                        </div>
+                        <div class="p-6 rounded-2xl bg-gray-50 text-center border border-gray-200">
+                            <div class="text-4xl mb-2">⚡</div>
+                            <h3 class="font-bold text-lg">Vulkan/DX12</h3>
+                            <p class="text-xs text-gray-500 uppercase tracking-widest">Modern APIs</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Subsystem Explorer -->
+        <section id="subsystems" class="mb-24 scroll-mt-20">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold mb-2">Subsystem Matrix</h2>
+                <p class="text-gray-600 italic">Select a component to explore the proprietary tech stack.</p>
+            </div>
+            
+            <div class="grid md:grid-cols-4 gap-6 mb-8">
+                <button onclick="updateSubsystem('euphoria')" id="btn-euphoria" class="sub-btn p-6 rounded-2xl bg-white border border-gray-200 text-left hover:border-amber-500 transition-all shadow-sm">
+                    <span class="text-3xl mb-4 block">🧬</span>
+                    <h3 class="font-bold text-xl">Euphoria</h3>
+                    <p class="text-sm text-gray-500 mt-1">Biomechanical Animation</p>
+                </button>
+                <button onclick="updateSubsystem('bullet')" id="btn-bullet" class="sub-btn p-6 rounded-2xl bg-white border border-gray-200 text-left hover:border-amber-500 transition-all shadow-sm">
+                    <span class="text-3xl mb-4 block">⚖️</span>
+                    <h3 class="font-bold text-xl">Bullet</h3>
+                    <p class="text-sm text-gray-500 mt-1">Rigid-Body Physics</p>
+                </button>
+                <button onclick="updateSubsystem('water')" id="btn-water" class="sub-btn p-6 rounded-2xl bg-white border border-gray-200 text-left hover:border-amber-500 transition-all shadow-sm">
+                    <span class="text-3xl mb-4 block">🌊</span>
+                    <h3 class="font-bold text-xl">Water/Fluid</h3>
+                    <p class="text-sm text-gray-500 mt-1">Hydrodynamic Sims</p>
+                </button>
+                <button onclick="updateSubsystem('causal')" id="btn-causal" class="sub-btn p-6 rounded-2xl bg-white border border-gray-200 text-left hover:border-amber-500 transition-all shadow-sm">
+                    <span class="text-3xl mb-4 block">🔗</span>
+                    <h3 class="font-bold text-xl">Causal Layer</h3>
+                    <p class="text-sm text-gray-500 mt-1">Systemic Logic</p>
+                </button>
+            </div>
+
+            <div id="subsystem-detail" class="bg-gray-900 text-white rounded-3xl p-8 md:p-12 transition-all">
+                <!-- Content injected by JS -->
+                <div class="flex flex-col md:flex-row gap-12 animate-pulse">
+                    <div class="flex-1 space-y-4">
+                        <div class="h-8 bg-gray-800 rounded w-1/4"></div>
+                        <div class="h-4 bg-gray-800 rounded w-3/4"></div>
+                        <div class="h-4 bg-gray-800 rounded w-5/6"></div>
+                        <div class="h-32 bg-gray-800 rounded w-full"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Causal Simulation Layer -->
+        <section id="simulation" class="mb-24 scroll-mt-20">
+            <h2 class="text-3xl font-bold mb-4">Causal Simulation Logic</h2>
+            <p class="text-gray-600 mb-10 max-w-2xl">
+                RAGE moves beyond "visual tricks" into <strong>Causal Simulation</strong>—an architectural philosophy where environmental changes trigger a cascade of logical updates across physics, AI, and audio.
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="causal-node p-8 rounded-3xl bg-white border border-gray-200 transition-all">
+                    <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-6 font-bold">01</div>
+                    <h3 class="text-xl font-bold mb-4">Environmental Trigger</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed mb-4">A rain state is triggered in the weather subsystem.</p>
+                    <ul class="text-xs text-gray-500 space-y-2">
+                        <li>• Volumetric cloud density increases</li>
+                        <li>• Surface shaders switch to "Wet" PBR mode</li>
+                    </ul>
+                </div>
+                <div class="causal-node p-8 rounded-3xl bg-white border border-gray-200 transition-all">
+                    <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mb-6 font-bold">02</div>
+                    <h3 class="text-xl font-bold mb-4">Physical Logic Update</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed mb-4">Friction coefficients on all world surfaces are dynamically modified.</p>
+                    <ul class="text-xs text-gray-500 space-y-2">
+                        <li>• Tire traction values decrease</li>
+                        <li>• Footstep audio propagation dampens</li>
+                    </ul>
+                </div>
+                <div class="causal-node p-8 rounded-3xl bg-white border border-gray-200 transition-all">
+                    <div class="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6 font-bold">03</div>
+                    <h3 class="text-xl font-bold mb-4">AI Behavior Shift</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed mb-4">NPCs perceive the "Wet" world state and alter interaction patterns.</p>
+                    <ul class="text-xs text-gray-500 space-y-2">
+                        <li>• Driving AI increases braking distances</li>
+                        <li>• Pedestrian schedules shift to "Shelter" seeking</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: AI & Next-Gen -->
+        <section class="mb-24">
+            <div class="bg-amber-900 rounded-3xl overflow-hidden shadow-xl">
+                <div class="grid md:grid-cols-2">
+                    <div class="p-12 text-white">
+                        <span class="inline-block px-3 py-1 rounded-full bg-amber-800 text-amber-200 text-xs font-bold mb-4 tracking-widest uppercase">Proprietary Insight</span>
+                        <h2 class="text-3xl font-bold mb-6">AI, Perception & Patents</h2>
+                        <p class="text-amber-100/80 mb-8 leading-relaxed">
+                            Rockstar's latest advancements in AI (authored primarily in Rockstar New England and LA) focus on <strong>Light-Aware Perception</strong>. NPC detection ranges are no longer simple proximity bubbles; they are calculated based on the engine's actual real-time light-value data.
+                        </p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-amber-800/40 p-4 rounded-xl">
+                                <h4 class="font-bold text-amber-300 mb-1">NPC Driving</h4>
+                                <p class="text-xs text-amber-100/60">Procedural reactions to high-speed events and traffic flow patterns.</p>
+                            </div>
+                            <div class="bg-amber-800/40 p-4 rounded-xl">
+                                <h4 class="font-bold text-amber-300 mb-1">Social Logic</h4>
+                                <p class="text-xs text-amber-100/60">Dynamic group interactions based on environmental lighting.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-amber-800/20 p-12 flex flex-col justify-center border-l border-amber-800/30">
+                        <h3 class="text-xl font-bold text-amber-200 mb-6">Next-Gen Integration Stack</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-4 bg-amber-900/40 rounded-xl">
+                                <span class="font-medium text-amber-100">Ray-Traced GI</span>
+                                <span class="text-xs bg-amber-500/20 text-amber-400 px-2 py-1 rounded">Active</span>
+                            </div>
+                            <div class="flex items-center justify-between p-4 bg-amber-900/40 rounded-xl">
+                                <span class="font-medium text-amber-100">DLSS 3.0 / FSR</span>
+                                <span class="text-xs bg-amber-500/20 text-amber-400 px-2 py-1 rounded">Optimized</span>
+                            </div>
+                            <div class="flex items-center justify-between p-4 bg-amber-900/40 rounded-xl">
+                                <span class="font-medium text-amber-100">Real-time AO</span>
+                                <span class="text-xs bg-amber-500/20 text-amber-400 px-2 py-1 rounded">Native</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Global Labor Matrix -->
+        <section id="global" class="mb-24 scroll-mt-20">
+            <div class="mb-12">
+                <h2 class="text-3xl font-bold mb-2">The Global Human Engine</h2>
+                <p class="text-gray-600">Visualizing the labor force behind the $2.5 billion development cycle.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-12">
+                <div class="bg-white p-8 rounded-3xl border border-gray-200">
+                    <h3 class="font-bold text-center mb-6">Geographic Workforce Distribution</h3>
+                    <div class="chart-container">
+                        <canvas id="geoChart"></canvas>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-6 text-center italic">
+                        India (32.1%) represents the largest hub, primarily focused on art and Vice Beach environments.
+                    </p>
+                </div>
+                <div class="bg-white p-8 rounded-3xl border border-gray-200">
+                    <h3 class="font-bold text-center mb-6">Functional Department Split</h3>
+                    <div class="chart-container">
+                        <canvas id="deptChart"></canvas>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-6 text-center italic">
+                        Over 55% of the workforce supports Finance, Operations, and Live Service Infrastructure.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer: The Future -->
+        <footer class="border-t border-gray-200 pt-12 pb-24 text-center">
+            <h2 class="text-2xl font-bold mb-4">The $2.5 Billion Challenge</h2>
+            <p class="text-gray-500 max-w-2xl mx-auto mb-8">
+                As Rockstar Games prepares for the November 2026 launch of Grand Theft Auto VI, the organization faces immense operational pressure. Between the <strong>Rockstar Games Workers Union</strong> formation and extreme compartmentalization security, the engine of the industry's most expensive production continues to evolve.
+            </p>
+            <div class="text-sm font-bold tracking-widest text-amber-600 uppercase">
+                End of Report Analysis
+            </div>
+        </footer>
+
+    </main>
+
+    <script>
+        // Subsystem Data Store
+        const subsystems = {
+            euphoria: {
+                title: "Euphoria Engine",
+                icon: "🧬",
+                desc: "Developed by NaturalMotion, this dynamic animation software bypasses pre-baked motion cycles. It simulates 3D biomechanical skeletal structures and nervous systems in real time.",
+                details: [
+                    "Procedural reactions to mass, velocity, and point of impact.",
+                    "NPCs 'stumble' to maintain balance rather than playing static death files.",
+                    "Integrates directly with the C++ RAGE runtime loop."
+                ],
+                color: "amber"
+            },
+            bullet: {
+                title: "Bullet Physics Library",
+                icon: "⚖️",
+                desc: "An open-source library hyper-optimized for Rockstar's needs. It handles rigid-body and soft-body dynamics, governing environmental collisions and vehicle deformation.",
+                details: [
+                    "Structural collapse calculations for destructible objects.",
+                    "Hard-surface crumple zones for hyper-detailed vehicle models.",
+                    "Manages complex intersections between dynamic and static world geometry."
+                ],
+                color: "blue"
+            },
+            water: {
+                title: "Water Physics & Hydrodynamics",
+                icon: "🌊",
+                desc: "Managed within the customized Bullet integration, water physics at Rockstar involves complex buoyancy calculations and realistic wave pattern generation.",
+                details: [
+                    "Real-time interaction between vessels and the shoreline.",
+                    "Hydrodynamic drag affecting vehicle handling in water.",
+                    "Procedural wave heights linked to the weather and wind simulation."
+                ],
+                color: "cyan"
+            },
+            causal: {
+                title: "Causal Simulation Layer",
+                icon: "🔗",
+                desc: "The 'Glue' of RAGE. It ensures that scripting and physics systems are inextricably linked, creating a world where every action has a logical systemic reaction.",
+                details: [
+                    "Dynamic weather cycles linked to surface traction variables.",
+                    "Sound propagation logic linked to material density and geometry.",
+                    "AI visibility dictated by actual lighting-layer calculations."
+                ],
+                color: "green"
+            }
+        };
+
+        // UI Logic
+        function updateSubsystem(key) {
+            const data = subsystems[key];
+            const detailContainer = document.getElementById('subsystem-detail');
+            
+            // Update active state of buttons
+            document.querySelectorAll('.sub-btn').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-amber-500', 'border-amber-500');
+            });
+            document.getElementById(`btn-${key}`).classList.add('ring-2', 'ring-amber-500', 'border-amber-500');
+
+            // Render detail
+            detailContainer.innerHTML = `
+                <div class="flex flex-col md:flex-row gap-12 items-center">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-4 mb-6">
+                            <span class="text-5xl">${data.icon}</span>
+                            <h2 class="text-4xl font-bold">${data.title}</h2>
+                        </div>
+                        <p class="text-lg text-gray-400 leading-relaxed mb-8">${data.desc}</p>
+                        <ul class="space-y-4">
+                            ${data.details.map(d => `
+                                <li class="flex items-start gap-3">
+                                    <span class="text-${data.color}-400 font-bold mt-1">✓</span>
+                                    <span class="text-gray-300 text-sm">${d}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                    <div class="w-full md:w-1/3 bg-gray-800 rounded-2xl p-6 border border-gray-700">
+                        <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Internal Workflow</h4>
+                        <div class="space-y-3">
+                            <div class="h-2 w-full bg-gray-700 rounded overflow-hidden">
+                                <div class="h-full bg-${data.color}-500" style="width: 85%"></div>
+                            </div>
+                            <div class="flex justify-between text-[10px] text-gray-500 uppercase">
+                                <span>Optimization</span>
+                                <span>85%</span>
+                            </div>
+                            <div class="h-2 w-full bg-gray-700 rounded overflow-hidden">
+                                <div class="h-full bg-${data.color}-500" style="width: 95%"></div>
+                            </div>
+                            <div class="flex justify-between text-[10px] text-gray-500 uppercase">
+                                <span>Simulation Fidelity</span>
+                                <span>95%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Charts Initialization
+        window.addEventListener('load', () => {
+            // Default subsystem
+            updateSubsystem('euphoria');
+
+            // Geographic Chart
+            const ctxGeo = document.getElementById('geoChart').getContext('2d');
+            new Chart(ctxGeo, {
+                type: 'doughnut',
+                data: {
+                    labels: ['India', 'United Kingdom', 'United States', 'Canada'],
+                    datasets: [{
+                        data: [32.1, 29.8, 24.7, 3.8],
+                        backgroundColor: ['#b45309', '#1e3a8a', '#1f2937', '#6b7280'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    },
+                    cutout: '70%'
+                }
+            });
+
+            // Departmental Chart
+            const ctxDept = document.getElementById('deptChart').getContext('2d');
+            new Chart(ctxDept, {
+                type: 'bar',
+                data: {
+                    labels: ['Finance & Ops', 'Engineering/Dev', 'Sales/Marketing'],
+                    datasets: [{
+                        label: '% of Workforce',
+                        data: [55.5, 27.6, 17.0],
+                        backgroundColor: '#d97706',
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { grid: { display: false }, max: 100 },
+                        y: { grid: { display: false } }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

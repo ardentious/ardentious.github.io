@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rockstar Games: Organizational Architecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #fcfbf7;
+            --accent: #d4af37;
+            --slate-deep: #1e293b;
+            --text-main: #334155;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+        }
+        .oswald { font-family: 'Oswald', sans-serif; }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 450px;
+        }
+        .studio-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .studio-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .timeline-line {
+            width: 2px;
+            background: linear-gradient(to bottom, var(--accent) 0%, var(--slate-deep) 100%);
+        }
+        .nav-link.active {
+            border-left: 4px solid var(--accent);
+            background-color: rgba(212, 175, 55, 0.1);
+            color: var(--slate-deep);
+            font-weight: 600;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row min-h-screen">
+
+    <nav id="sidebar" class="fixed bottom-0 w-full md:sticky md:top-0 md:h-screen md:w-64 bg-white border-r border-slate-200 z-50 p-4 flex md:flex-col justify-around md:justify-start gap-2 shadow-lg md:shadow-none">
+        <div class="hidden md:block mb-8 px-2">
+            <h1 class="oswald text-2xl font-bold tracking-tighter text-slate-900">ROCKSTAR<span class="text-amber-500">GAMES</span></h1>
+            <p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Org Architecture 2026</p>
+        </div>
+        <button onclick="scrollToSection('hero')" class="nav-link w-full text-left py-2 px-3 rounded text-sm text-slate-500 transition-colors hover:bg-slate-50">Overview</button>
+        <button onclick="scrollToSection('network')" class="nav-link w-full text-left py-2 px-3 rounded text-sm text-slate-500 transition-colors hover:bg-slate-50">Global Network</button>
+        <button onclick="scrollToSection('technology')" class="nav-link w-full text-left py-2 px-3 rounded text-sm text-slate-500 transition-colors hover:bg-slate-50">RAGE Tech</button>
+        <button onclick="scrollToSection('truth')" class="nav-link w-full text-left py-2 px-3 rounded text-sm text-slate-500 transition-colors hover:bg-slate-50">Fact Check</button>
+        <button onclick="scrollToSection('workforce')" class="nav-link w-full text-left py-2 px-3 rounded text-sm text-slate-500 transition-colors hover:bg-slate-50">Workforce</button>
+        <button onclick="scrollToSection('departments')" class="nav-link w-full text-left py-2 px-3 rounded text-sm text-slate-500 transition-colors hover:bg-slate-50">Disciplines</button>
+    </nav>
+
+    <main class="flex-1 w-full p-4 md:p-12 max-w-6xl mx-auto mb-20 md:mb-0">
+        
+        <section id="hero" class="mb-20 pt-8">
+            <div class="border-l-8 border-amber-500 pl-6 py-2 mb-8">
+                <h2 class="oswald text-5xl md:text-7xl font-bold text-slate-900 leading-none mb-4 uppercase">Unified Global Production</h2>
+                <p class="text-xl text-slate-600 max-w-2xl">From a decentralized confederation to a singular, cross-continental production unit. This report analyzes the architectural shift that defines the modern era of Rockstar Games.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-lg border border-slate-100 shadow-sm">
+                    <p class="text-amber-600 font-bold text-sm mb-2">Strategy</p>
+                    <h3 class="font-bold text-slate-900 mb-2 italic">"Rockstar Studios"</h3>
+                    <p class="text-sm text-slate-500">The dissolution of studio boundaries into a single global entity for flagship titles like RDR2 and GTA VI.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg border border-slate-100 shadow-sm">
+                    <p class="text-amber-600 font-bold text-sm mb-2">Workforce</p>
+                    <h3 class="font-bold text-slate-900 mb-2 italic">~5,200 Employees</h3>
+                    <p class="text-sm text-slate-500">A massive labor force of specialists across four continents, focused on long-term lifecycle strategies.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg border border-slate-100 shadow-sm">
+                    <p class="text-amber-600 font-bold text-sm mb-2">Economics</p>
+                    <h3 class="font-bold text-slate-900 mb-2 italic">$2.5B+ Budget</h3>
+                    <p class="text-sm text-slate-500">The estimated cost of developing and marketing GTA VI, making it the most expensive media production ever.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="network" class="mb-24">
+            <div class="mb-10">
+                <h3 class="oswald text-3xl font-bold text-slate-900 mb-4 uppercase">The Studio Matrix</h3>
+                <p class="text-slate-600 mb-6">Rockstar operates through a complex network of regional subsidiaries, each contributing specific technical and creative expertise to the unified pipeline. Use the filters below to explore their specialized roles.</p>
+                <div class="flex flex-wrap gap-2 mb-8" id="filter-container">
+                    <button onclick="filterStudios('all')" class="filter-btn active bg-slate-900 text-white px-4 py-1 rounded-full text-xs font-semibold">All Divisions</button>
+                    <button onclick="filterStudios('active')" class="filter-btn bg-white border border-slate-300 text-slate-600 px-4 py-1 rounded-full text-xs font-semibold hover:bg-slate-50">Active</button>
+                    <button onclick="filterStudios('defunct')" class="filter-btn bg-white border border-slate-300 text-slate-600 px-4 py-1 rounded-full text-xs font-semibold hover:bg-slate-50">Defunct</button>
+                </div>
+            </div>
+
+            <div id="studio-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Injected via JS -->
+            </div>
+        </section>
+
+        <section id="technology" class="mb-24 bg-slate-900 p-8 md:p-16 rounded-2xl text-white">
+            <div class="max-w-3xl mb-12">
+                <h3 class="oswald text-4xl font-bold mb-6 uppercase tracking-tight">The RAGE Engine Room</h3>
+                <p class="text-slate-400 text-lg">In response to Electronic Arts acquiring RenderWare in 2004, Rockstar built its own technological fortress: the <strong>Rockstar Advanced Game Engine (RAGE)</strong>. Managed by the RAGE Technology Group in San Diego, it is the bedrock of their open-world fidelity.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div class="space-y-8">
+                    <div class="flex gap-6">
+                        <div class="flex flex-col items-center">
+                            <div class="w-4 h-4 bg-amber-500 rounded-full"></div>
+                            <div class="flex-1 timeline-line my-2"></div>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-amber-500 uppercase text-sm tracking-widest">Physics & Animation</h4>
+                            <p class="text-slate-300 text-sm mt-1">Integration of <strong>Euphoria</strong> for real-time biomechanical simulation and <strong>Bullet</strong> for complex environmental collisions.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-6">
+                        <div class="flex flex-col items-center">
+                            <div class="w-4 h-4 bg-amber-500 rounded-full"></div>
+                            <div class="flex-1 timeline-line my-2"></div>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-amber-500 uppercase text-sm tracking-widest">Causal Systems</h4>
+                            <p class="text-slate-300 text-sm mt-1">Scripting layers that link weather cycles to traction and AI reactions to environmental lighting changes.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-6">
+                        <div class="flex flex-col items-center">
+                            <div class="w-4 h-4 bg-amber-500 rounded-full"></div>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-amber-500 uppercase text-sm tracking-widest">Scale & Performance</h4>
+                            <p class="text-slate-300 text-sm mt-1">From 720p standardization in GTA V to ray-traced global illumination and DLSS integration for GTA VI.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                    <h4 class="oswald text-xl mb-4 text-white">Middleware Ecosystem</h4>
+                    <ul class="space-y-4 text-sm">
+                        <li class="flex justify-between border-b border-slate-700 pb-2">
+                            <span class="text-slate-400">Character Physics</span>
+                            <span class="text-amber-500 font-mono">Euphoria Engine</span>
+                        </li>
+                        <li class="flex justify-between border-b border-slate-700 pb-2">
+                            <span class="text-slate-400">Collision/Dynamics</span>
+                            <span class="text-amber-500 font-mono">Bullet Physics</span>
+                        </li>
+                        <li class="flex justify-between border-b border-slate-700 pb-2">
+                            <span class="text-slate-400">API Support</span>
+                            <span class="text-amber-500 font-mono">Vulkan / DX12</span>
+                        </li>
+                        <li class="flex justify-between">
+                            <span class="text-slate-400">Scripting Language</span>
+                            <span class="text-amber-500 font-mono">Proprietary C++</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="truth" class="mb-24">
+            <div class="text-center mb-12">
+                <h3 class="oswald text-3xl font-bold text-slate-900 mb-2 uppercase">Myths vs. Reality</h3>
+                <p class="text-slate-500 italic">Fact-checking the most common rumors regarding Rockstar's acquisitions and structure.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-100 flex flex-col h-full">
+                    <div class="mb-4">
+                        <span class="bg-red-100 text-red-600 px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest">Rumor / Variant of Truth</span>
+                        <h4 class="text-xl font-bold text-slate-900 mt-2">"Rockstar East & Rockstar West"</h4>
+                    </div>
+                    <p class="text-slate-600 text-sm mb-6 flex-grow">Many fans believe there are two giant umbrella divisions directing the studios in the East and West hemispheres.</p>
+                    <div class="bg-slate-50 p-4 rounded border-l-4 border-slate-400">
+                        <p class="text-xs font-bold text-slate-800 uppercase mb-1">The Reality</p>
+                        <p class="text-xs text-slate-600">These are defensive trademark filings and fan colloquialisms. No physical development divisions exist under these names. Corporate strategy is run from Rockstar NYC.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-100 flex flex-col h-full">
+                    <div class="mb-4">
+                        <span class="bg-green-100 text-green-600 px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest">Verified Strategic Fact</span>
+                        <h4 class="text-xl font-bold text-slate-900 mt-2">The Forza Vehicle Connection</h4>
+                    </div>
+                    <p class="text-slate-600 text-sm mb-6 flex-grow">Rumors suggested Rockstar poached Forza Horizon's car modelers to build GTA vehicles.</p>
+                    <div class="bg-green-50 p-4 rounded border-l-4 border-green-500">
+                        <p class="text-xs font-bold text-slate-800 uppercase mb-1">The Truth: Dhruva Interactive</p>
+                        <p class="text-xs text-slate-600">Rockstar acquired Dhruva Interactive for $7.9M in 2019. Dhruva had modeled vehicles for Forza Horizon 2/3 and Motorsport 5/6. They were merged into Rockstar India.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="workforce" class="mb-24">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h3 class="oswald text-3xl font-bold text-slate-900 mb-6 uppercase">The Human Capital Breakdown</h3>
+                    <p class="text-slate-600 mb-4">Rockstar's personnel is concentrated in three main hubs: India, the UK, and the USA. This geographical spread ensures a "follow-the-sun" development model where assets can be iterated on 24/7 across time zones.</p>
+                    <div class="space-y-4">
+                        <div class="p-4 bg-white rounded shadow-sm border-l-4 border-amber-500">
+                            <h5 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Primary Territory</h5>
+                            <p class="font-bold text-slate-900">Rockstar India: 32.1% of workforce</p>
+                        </div>
+                        <div class="p-4 bg-white rounded shadow-sm border-l-4 border-slate-300">
+                            <h5 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Strategic Discipline</h5>
+                            <p class="font-bold text-slate-900">Finance & Ops: 55.5% of workforce</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <p class="text-center text-xs font-bold text-slate-400 uppercase mb-4">Geographic Distribution (2025/2026)</p>
+                    <div class="chart-container">
+                        <canvas id="regionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="departments" class="mb-24">
+            <div class="mb-10 text-center">
+                <h3 class="oswald text-3xl font-bold text-slate-900 mb-4 uppercase">Core Development Disciplines</h3>
+                <p class="text-slate-600 max-w-2xl mx-auto">Inside the unified "Rockstar Studios" model, specialists are allocated into five primary technical pillars to drive the production pipeline.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="discipline-grid">
+                <!-- Injected via JS -->
+            </div>
+        </section>
+
+        <section id="labor" class="mb-32">
+            <div class="bg-amber-50 border border-amber-100 p-8 md:p-12 rounded-3xl">
+                <div class="flex flex-col md:flex-row gap-10">
+                    <div class="md:w-1/3">
+                        <h3 class="oswald text-3xl font-bold text-slate-900 leading-tight mb-4 uppercase">The Cost of Perfection</h3>
+                        <div class="w-16 h-1 bg-amber-500 mb-4"></div>
+                        <p class="text-slate-600 text-sm">As the November 2026 launch of GTA VI approaches, industrial labor relations have shifted significantly due to RTO mandates and the formation of the Rockstar Games Workers Union.</p>
+                    </div>
+                    <div class="flex-1 space-y-6">
+                        <div class="bg-white p-6 rounded-xl shadow-sm">
+                            <h4 class="font-bold text-slate-900 mb-2">Compartmentalization & Security</h4>
+                            <p class="text-sm text-slate-500">To prevent leaks, developers are divided into "cells," often working on isolated tasks like a single NPC behavior or street layout without access to the full game build.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm">
+                            <h4 class="font-bold text-slate-900 mb-2">The Unionization Push</h4>
+                            <p class="text-sm text-slate-500">In May 2026, the <strong>Rockstar Games Workers Union</strong> was formed by IWGB, representing employees across five major UK studios in response to RTO policies and dismissals.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="text-center py-12 border-t border-slate-200">
+            <p class="oswald text-lg font-bold text-slate-900 uppercase tracking-tighter">Rockstar Games: Architecture Analysis</p>
+            <p class="text-xs text-slate-400 mt-2">© 2026 Information Architecture & Research Study. Based on industrial synthesis.</p>
+        </footer>
+
+    </main>
+
+    <script>
+        const studios = [
+            { name: "Rockstar North", location: "Edinburgh, Scotland", role: "Grand Theft Auto Lead, World Prototyping", status: "active", acquired: "1988/2002" },
+            { name: "Rockstar San Diego", location: "Carlsbad, CA, USA", role: "Red Dead Lead, RAGE Engine Development", status: "active", acquired: "1984/2002" },
+            { name: "Rockstar India", location: "Bengaluru, India", role: "High-end 3D Art, Asset Pipelines, Forza-Expertise", status: "active", acquired: "2016" },
+            { name: "Rockstar Leeds", location: "Leeds, England", role: "Handheld Adaptations, UI, PC Porting", status: "active", acquired: "1997/2004" },
+            { name: "Rockstar Lincoln", location: "Lincoln, England", role: "Localization & Global Quality Assurance", status: "active", acquired: "1992/2002" },
+            { name: "Rockstar London", location: "London, England", role: "Marketing, PR, Completion Support", status: "active", acquired: "2005" },
+            { name: "Rockstar Toronto", location: "Oakville, Canada", role: "Technical Graphics, PC Optimization", status: "active", acquired: "1980s/1999" },
+            { name: "Rockstar New England", location: "Andover, MA, USA", role: "AI Engineering, Systems Programming", status: "active", acquired: "1999/2008" },
+            { name: "Rockstar Dundee", location: "Dundee, Scotland", role: "Graphics Tools & Live-Service Tech", status: "active", acquired: "2008/2020" },
+            { name: "Rockstar LA", location: "Santa Monica, CA, USA", role: "Mo-Cap Tech, NPC Behavior, Casting", status: "active", acquired: "2023" },
+            { name: "Cfx.re", location: "Remote", role: "Community Modding & Roleplay Infrastructure", status: "active", acquired: "2016/2023" },
+            { name: "Rockstar Vancouver", location: "Vancouver, Canada", role: "Max Payne 3, Bully (Defunct - Merged to Toronto)", status: "defunct", acquired: "1998/2002" },
+            { name: "Rockstar Vienna", location: "Vienna, Austria", role: "GTA Porting (Defunct - Merged to London)", status: "defunct", acquired: "1993/2003" }
+        ];
+
+        const disciplines = [
+            { title: "Software Engineering", desc: "Runtime code, graphics rendering, and the offline world editors used for environment creation.", icon: "&#10021;" },
+            { title: "Art & Environment", desc: "Concept work, 3D modeling of characters and vehicles, and procedural world-building tools.", icon: "&#127912;" },
+            { title: "Design & Scripting", desc: "Core mechanics, mission layouts, and AI spawn triggers that define the player experience.", icon: "&#128221;" },
+            { title: "Animation & Mo-Cap", desc: "Procedural motion blending and physical hit reactions utilizing the Euphoria engine.", icon: "&#127903;" },
+            { title: "Audio & Sound", desc: "Acoustic propagation logic and sourcing of environmental foley and vehicular engine loops.", icon: "&#128266;" },
+            { title: "Infrastructure & Ops", desc: "IT services, anti-cheat mechanisms, and server maintenance for GTA Online lifecycle.", icon: "&#128187;" }
+        ];
+
+        function renderStudios(filter = 'all') {
+            const grid = document.getElementById('studio-grid');
+            grid.innerHTML = '';
+            
+            const filtered = studios.filter(s => {
+                if (filter === 'all') return true;
+                return s.status === filter;
+            });
+
+            filtered.forEach(s => {
+                const card = document.createElement('div');
+                card.className = `studio-card bg-white p-6 rounded-xl border border-slate-100 shadow-sm flex flex-col ${s.status === 'defunct' ? 'opacity-60' : ''}`;
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <h4 class="font-bold text-slate-900 leading-tight">${s.name}</h4>
+                        <span class="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded ${s.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-slate-200 text-slate-600'}">${s.status}</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 font-bold mb-3">${s.location.toUpperCase()}</p>
+                    <p class="text-xs text-slate-500 mb-4 flex-grow">${s.role}</p>
+                    <div class="pt-4 border-t border-slate-50 flex justify-between items-center text-[10px]">
+                        <span class="text-slate-400">Acquired</span>
+                        <span class="font-mono font-bold text-slate-700">${s.acquired}</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function renderDisciplines() {
+            const grid = document.getElementById('discipline-grid');
+            disciplines.forEach(d => {
+                const div = document.createElement('div');
+                div.className = "bg-white p-8 rounded-xl border border-slate-50 shadow-sm hover:border-amber-200 transition-colors";
+                div.innerHTML = `
+                    <div class="text-3xl mb-4">${d.icon}</div>
+                    <h4 class="oswald text-lg font-bold text-slate-900 mb-2 uppercase">${d.title}</h4>
+                    <p class="text-sm text-slate-500 leading-relaxed">${d.desc}</p>
+                `;
+                grid.appendChild(div);
+            });
+        }
+
+        function initCharts() {
+            const ctx = document.getElementById('regionChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['India', 'UK Studios', 'USA Studios', 'Canada'],
+                    datasets: [{
+                        label: 'Workforce Share (%)',
+                        data: [32.1, 29.8, 24.7, 3.8],
+                        backgroundColor: ['#d4af37', '#1e293b', '#475569', '#cbd5e1'],
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => ` ${context.parsed.x}% of Global Workforce`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { 
+                            beginAtZero: true, 
+                            max: 40,
+                            grid: { display: false },
+                            ticks: { font: { size: 10 } }
+                        },
+                        y: { 
+                            grid: { display: false },
+                            ticks: { font: { weight: 'bold', size: 11 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function filterStudios(type) {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-slate-900', 'text-white');
+                btn.classList.add('bg-white', 'text-slate-600', 'border-slate-300');
+            });
+            const activeBtn = event.target;
+            activeBtn.classList.add('active', 'bg-slate-900', 'text-white');
+            activeBtn.classList.remove('bg-white', 'text-slate-600', 'border-slate-300');
+            renderStudios(type);
+        }
+
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+            updateActiveLink();
+        }
+
+        function updateActiveLink() {
+            const sections = ['hero', 'network', 'technology', 'truth', 'workforce', 'departments'];
+            const scrollPos = window.scrollY + 200;
+            
+            sections.forEach(id => {
+                const el = document.getElementById(id);
+                const link = document.querySelector(`button[onclick="scrollToSection('${id}')"]`);
+                if (link && el.offsetTop <= scrollPos && (el.offsetTop + el.offsetHeight) > scrollPos) {
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        window.addEventListener('scroll', updateActiveLink);
+        window.onload = () => {
+            renderStudios();
+            renderDisciplines();
+            initCharts();
+            updateActiveLink();
+        };
+    </script>
+</body>
+</html>

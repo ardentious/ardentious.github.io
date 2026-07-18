@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Three-Body Problem Simulator</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #030712;
+            color: #f3f4f6;
+            overflow: hidden;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        /* Custom scrollbar for control panel */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111827;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4b5563;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col md:flex-row select-none">
+
+    <!-- Sidebar Control Panel -->
+    <div id="sidebar" class="w-full md:w-96 bg-gray-950 border-b md:border-b-0 md:border-r border-gray-800 flex flex-col h-1/2 md:h-full z-10 transition-all duration-300">
+        <!-- Header -->
+        <div class="p-4 border-b border-gray-800 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-circle-nodes text-indigo-500 text-xl animate-pulse"></i>
+                <h1 class="text-lg font-bold tracking-wider uppercase text-gray-100">Three-Body Sim</h1>
+            </div>
+            <span class="text-xs bg-indigo-950 text-indigo-400 border border-indigo-800 px-2 py-0.5 rounded-full font-semibold">Chaotic Sandbox</span>
+        </div>
+
+        <!-- Controls Container (Scrollable) -->
+        <div class="flex-1 overflow-y-auto p-4 space-y-5">
+            
+            <!-- Quick Presets -->
+            <div>
+                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Select Orbit Preset</label>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="loadPreset('figure8')" class="preset-btn bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded p-2 text-sm text-left font-medium transition flex items-center justify-between">
+                        <span>Figure-8</span>
+                        <i class="fa-solid fa-infinity text-xs text-indigo-400"></i>
+                    </button>
+                    <button onclick="loadPreset('lagrange')" class="preset-btn bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded p-2 text-sm text-left font-medium transition flex items-center justify-between">
+                        <span>Lagrangian (L4/L5)</span>
+                        <i class="fa-solid fa-triangle-exclamation text-xs text-amber-400"></i>
+                    </button>
+                    <button onclick="loadPreset('chaotic')" class="preset-btn bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded p-2 text-sm text-left font-medium transition flex items-center justify-between">
+                        <span>Chaotic Trio</span>
+                        <i class="fa-solid fa-shuffle text-xs text-rose-400"></i>
+                    </button>
+                    <button onclick="loadPreset('binary_planet')" class="preset-btn bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded p-2 text-sm text-left font-medium transition flex items-center justify-between">
+                        <span>Double Binary</span>
+                        <i class="fa-solid fa-circle-dot text-xs text-emerald-400"></i>
+                    </button>
+                    <button onclick="loadPreset('golden_ratio')" class="preset-btn bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded p-2 text-sm text-left font-medium transition flex items-center justify-between">
+                        <span>Golden Ratio</span>
+                        <i class="fa-solid fa-compass text-xs text-cyan-400"></i>
+                    </button>
+                    <button onclick="loadPreset('barycentric')" class="preset-btn bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded p-2 text-sm text-left font-medium transition flex items-center justify-between">
+                        <span>Barycentric Loop</span>
+                        <i class="fa-solid fa-rotate text-xs text-pink-400"></i>
+                    </button>
+                </div>
+            </div>
+
+            <hr class="border-gray-900" />
+
+            <!-- Dynamic Physical Settings -->
+            <div class="space-y-4">
+                <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Simulation parameters</h3>
+                
+                <!-- G Constant Slider -->
+                <div>
+                    <div class="flex justify-between text-xs mb-1">
+                        <span class="text-gray-300">Gravitational Constant (G)</span>
+                        <span id="g-value" class="font-mono text-indigo-400">1.00</span>
+                    </div>
+                    <input type="range" id="g-slider" min="0.1" max="5.0" step="0.1" value="1.0" class="w-full accent-indigo-500 bg-gray-800 h-1.5 rounded-lg appearance-none cursor-pointer">
+                </div>
+
+                <!-- Simulation Speed -->
+                <div>
+                    <div class="flex justify-between text-xs mb-1">
+                        <span class="text-gray-300">Time Step (Δt / step)</span>
+                        <span id="dt-value" class="font-mono text-indigo-400">0.001</span>
+                    </div>
+                    <input type="range" id="dt-slider" min="0.001" max="0.02" step="0.001" value="0.001" class="w-full accent-indigo-500 bg-gray-800 h-1.5 rounded-lg appearance-none cursor-pointer">
+                </div>
+
+                <!-- Substeps (Stability) -->
+                <div>
+                    <div class="flex justify-between text-xs mb-1">
+                        <span class="text-gray-300">Physics Steps / Frame</span>
+                        <span id="substep-value" class="font-mono text-indigo-400">15</span>
+                    </div>
+                    <input type="range" id="substep-slider" min="1" max="50" step="1" value="15" class="w-full accent-indigo-500 bg-gray-800 h-1.5 rounded-lg appearance-none cursor-pointer">
+                </div>
+
+                <!-- Trail Duration -->
+                <div>
+                    <div class="flex justify-between text-xs mb-1">
+                        <span class="text-gray-300">Orbital Trail Length</span>
+                        <span id="trail-value" class="font-mono text-indigo-400">1200</span>
+                    </div>
+                    <input type="range" id="trail-slider" min="50" max="5000" step="50" value="1200" class="w-full accent-indigo-500 bg-gray-800 h-1.5 rounded-lg appearance-none cursor-pointer">
+                </div>
+            </div>
+
+            <hr class="border-gray-900" />
+
+            <!-- Body Properties Editor -->
+            <div class="space-y-3">
+                <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Active Bodies Configuration</h3>
+                
+                <div class="space-y-2" id="body-configuration-list">
+                    <!-- Dynamic lists generated by Javascript -->
+                </div>
+            </div>
+
+            <hr class="border-gray-900" />
+
+            <!-- Diagnostics Metrics Dashboard -->
+            <div class="bg-gray-900/50 p-3 rounded-lg border border-gray-950 space-y-2">
+                <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Live Telemetry</h3>
+                <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+                    <div class="bg-black/30 p-2 rounded">
+                        <div class="text-[10px] text-gray-500 uppercase">Kinetic Energy</div>
+                        <span id="metric-ke" class="text-emerald-400">0.0000</span>
+                    </div>
+                    <div class="bg-black/30 p-2 rounded">
+                        <div class="text-[10px] text-gray-500 uppercase">Potential Energy</div>
+                        <span id="metric-pe" class="text-rose-400">0.0000</span>
+                    </div>
+                    <div class="bg-black/30 p-2 rounded col-span-2">
+                        <div class="text-[10px] text-gray-500 uppercase">Total Energy (H)</div>
+                        <div class="flex justify-between items-center">
+                            <span id="metric-te" class="text-indigo-400 font-bold">0.0000</span>
+                            <span id="metric-drift" class="text-[10px] text-gray-400">Drift: 0.0%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Sticky Interaction Guide & General Controls -->
+        <div class="p-4 border-t border-gray-800 bg-gray-950/90 flex flex-col gap-3">
+            <div class="flex items-center space-x-2 text-xs text-gray-400">
+                <i class="fa-solid fa-circle-info text-blue-400"></i>
+                <span>Drag bodies to move. Drag arrows to adjust velocity vectors. Scroll to Zoom, Drag canvas to Pan.</span>
+            </div>
+            <div class="grid grid-cols-3 gap-2">
+                <button id="btn-play" onclick="togglePlay()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 px-3 rounded text-sm transition flex items-center justify-center space-x-2">
+                    <i id="play-icon" class="fa-solid fa-pause"></i>
+                    <span id="play-text">Pause</span>
+                </button>
+                <button onclick="recenter()" class="bg-gray-800 hover:bg-gray-700 text-gray-200 font-semibold py-2 px-3 rounded text-sm transition flex items-center justify-center space-x-1" title="Recenter Camera to Center of Mass">
+                    <i class="fa-solid fa-compress"></i>
+                    <span class="hidden lg:inline">Center</span>
+                </button>
+                <button onclick="clearTrails()" class="bg-gray-800 hover:bg-gray-700 text-gray-200 font-semibold py-2 px-3 rounded text-sm transition flex items-center justify-center space-x-1" title="Clear all orbits traces">
+                    <i class="fa-solid fa-eraser"></i>
+                    <span class="hidden lg:inline">Clear</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Simulation Viewport -->
+    <div class="flex-1 relative h-1/2 md:h-full">
+        <!-- Overlay Canvas Panel Details -->
+        <div class="absolute top-4 left-4 z-10 pointer-events-none flex flex-col space-y-1 bg-black/40 p-3 rounded border border-gray-800/40 backdrop-blur-sm">
+            <div class="text-sm font-bold tracking-tight text-white flex items-center space-x-2">
+                <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                <span id="status-label">Simulation Active</span>
+            </div>
+            <div class="text-xs font-mono text-gray-400" id="coords-display">
+                Camera Zoom: 100% | Pan: (0,0)
+            </div>
+        </div>
+
+        <div class="absolute top-4 right-4 z-10 flex space-x-2">
+            <!-- Toggle Vector Guide Visuals -->
+            <button onclick="toggleVectors()" id="btn-vector" class="bg-indigo-950/40 border-indigo-800 text-gray-300 p-2 rounded border text-xs flex items-center space-x-1 font-semibold transition shadow-md">
+                <i class="fa-solid fa-location-arrow text-indigo-400"></i>
+                <span id="vector-toggle-text">Show Vectors</span>
+            </button>
+            <!-- Toggle Trail Visuals -->
+            <button onclick="toggleTrailsDisplay()" id="btn-trail-disp" class="bg-gray-900/95 hover:bg-gray-800 text-gray-300 p-2 rounded border border-gray-800 text-xs flex items-center space-x-1 font-semibold transition shadow-md">
+                <i class="fa-solid fa-route text-rose-400"></i>
+                <span id="trail-toggle-text">Hide Trails</span>
+            </button>
+            <!-- Restart Button -->
+            <button onclick="restartCurrentPreset()" class="bg-gray-900/95 hover:bg-gray-800 text-red-400 p-2 rounded border border-gray-800 text-xs flex items-center space-x-1 font-semibold transition shadow-md" title="Restart Preset">
+                <i class="fa-solid fa-arrow-rotate-left"></i>
+            </button>
+        </div>
+
+        <canvas id="sim-canvas" class="w-full h-full cursor-grab active:cursor-grabbing"></canvas>
+    </div>
+
+    <!-- Core Physics & Interaction Script -->
+    <script>
+        const canvas = document.getElementById('sim-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Physics parameters state
+        let G = 1.0;
+        let dt = 0.001;
+        let subSteps = 15;
+        let maxTrailPoints = 1200;
+        let isPlaying = true;
+        let drawVectors = false;
+        let drawTrails = true;
+
+        // View coordinate matrix / transformations
+        let zoom = 1.0;
+        let pan = { x: 0, y: 0 };
+        let isDraggingCanvas = false;
+        let dragStart = { x: 0, y: 0 };
+        let clickStartPos = { x: 0, y: 0 };
+
+        // Interaction State
+        let hoveredBodyIndex = -1;
+        let hoveredVectorIndex = -1;
+        let activeDragIndex = -1; // Index of body being dragged
+        let activeVectorIndex = -1; // Index of velocity vector being adjusted
+        let isMouseDown = false;
+
+        // Base system parameters tracking
+        let initialSystemEnergy = null;
+        let currentPresetName = 'figure8';
+
+        // 3-Body Array State
+        let bodies = [];
+
+        // Define colors representing elements
+        const colors = [
+            { main: '#3b82f6', glow: 'rgba(59, 130, 246, 0.4)', path: 'rgba(59, 130, 246, 0.25)' }, // Teal-Blue
+            { main: '#ec4899', glow: 'rgba(236, 72, 153, 0.4)', path: 'rgba(236, 72, 153, 0.25)' }, // Pink/Magenta
+            { main: '#10b981', glow: 'rgba(16, 185, 129, 0.4)', path: 'rgba(16, 185, 129, 0.25)' }  // Emerald
+        ];
+
+        // System Presets Configuration
+        const presets = {
+            figure8: {
+                name: 'figure8',
+                zoom: 170,
+                bodies: [
+                    { x: -0.97000436, y: 0.24308753, vx: 0.46620531, vy: 0.43236573, mass: 1.0, color: colors[0], name: "Alpha Star" },
+                    { x: 0.97000436, y: -0.24308753, vx: 0.46620531, vy: 0.43236573, mass: 1.0, color: colors[1], name: "Beta Star" },
+                    { x: 0, y: 0, vx: -2 * 0.46620531, vy: -2 * 0.43236573, mass: 1.0, color: colors[2], name: "Gamma Star" }
+                ]
+            },
+            lagrange: {
+                name: 'lagrange',
+                zoom: 140,
+                bodies: [
+                    // Triangle constellation orbiting center barycenter
+                    { x: -1.0, y: -0.57735, vx: 0.25, vy: -0.433, mass: 1.0, color: colors[0], name: "Alpha Star" },
+                    { x: 1.0, y: -0.57735, vx: 0.25, vy: 0.433, mass: 1.0, color: colors[1], name: "Beta Star" },
+                    { x: 0.0, y: 1.1547, vx: -0.5, vy: 0.0, mass: 1.0, color: colors[2], name: "Gamma Star" }
+                ]
+            },
+            chaotic: {
+                name: 'chaotic',
+                zoom: 120,
+                bodies: [
+                    { x: -1.2, y: 0.5, vx: -0.1, vy: -0.3, mass: 1.5, color: colors[0], name: "Alpha Star" },
+                    { x: 1.0, y: -0.8, vx: 0.3, vy: 0.2, mass: 1.2, color: colors[1], name: "Beta Star" },
+                    { x: 0.1, y: 0.8, vx: -0.2, vy: 0.1, mass: 0.8, color: colors[2], name: "Gamma Star" }
+                ]
+            },
+            binary_planet: {
+                name: 'binary_planet',
+                zoom: 130,
+                bodies: [
+                    // Double binary (Two heavy stars with orbiting lower mass exoplanet)
+                    { x: -1.0, y: 0.0, vx: 0.0, vy: -0.4, mass: 2.0, color: colors[0], name: "Heavy Primary A" },
+                    { x: 1.0, y: 0.0, vx: 0.0, vy: 0.4, mass: 2.0, color: colors[1], name: "Heavy Primary B" },
+                    { x: 0.0, y: 1.8, vx: 0.75, vy: 0.0, mass: 0.05, color: colors[2], name: "Rogue Planetoid" }
+                ]
+            },
+            golden_ratio: {
+                name: 'golden_ratio',
+                zoom: 160,
+                bodies: [
+                    // Golden ratio dynamics configuration
+                    { x: -0.85, y: 0.0, vx: 0.1, vy: 0.55, mass: 1.0, color: colors[0], name: "Alpha Star" },
+                    { x: 0.85, y: 0.0, vx: 0.1, vy: -0.55, mass: 1.0, color: colors[1], name: "Beta Star" },
+                    { x: 0.0, y: 0.05, vx: -0.2, vy: 0.0, mass: 1.0, color: colors[2], name: "Gamma Star" }
+                ]
+            },
+            barycentric: {
+                name: 'barycentric',
+                zoom: 150,
+                bodies: [
+                    { x: -1.0, y: -0.1, vx: -0.1, vy: 0.5, mass: 1.3, color: colors[0], name: "Alpha Star" },
+                    { x: 0.8, y: -0.5, vx: 0.4, vy: -0.3, mass: 1.1, color: colors[1], name: "Beta Star" },
+                    { x: 0.2, y: 0.6, vx: -0.3, vy: -0.2, mass: 1.0, color: colors[2], name: "Gamma Star" }
+                ]
+            }
+        };
+
+        // Window Resizing Setup
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            recenter();
+        });
+
+        // Initialize Application Context
+        function init() {
+            resizeCanvas();
+            
+            // Connect range elements
+            setupSliders();
+
+            // Load original starting state
+            loadPreset('figure8');
+            
+            // Register interaction inputs
+            setupInteraction();
+
+            // Frame tick loop
+            requestAnimationFrame(loop);
+        }
+
+        // Connect range elements
+        function setupSliders() {
+            const sliders = [
+                { id: 'g-slider', out: 'g-value', update: (val) => { G = parseFloat(val); } },
+                { id: 'dt-slider', out: 'dt-value', update: (val) => { dt = parseFloat(val); } },
+                { id: 'substep-slider', out: 'substep-value', update: (val) => { subSteps = parseInt(val); } },
+                { id: 'trail-slider', out: 'trail-value', update: (val) => { 
+                    maxTrailPoints = parseInt(val);
+                    bodies.forEach(b => {
+                        if(b.trail.length > maxTrailPoints) {
+                            b.trail = b.trail.slice(-maxTrailPoints);
+                        }
+                    });
+                } }
+            ];
+
+            sliders.forEach(s => {
+                const el = document.getElementById(s.id);
+                const out = document.getElementById(s.out);
+                el.addEventListener('input', (e) => {
+                    out.textContent = e.target.value;
+                    s.update(e.target.value);
+                });
+            });
+        }
+
+        // Setup active inputs / sliders inside sidebar dynamic components
+        function updateSidebarConfigurationList() {
+            const container = document.getElementById('body-configuration-list');
+            container.innerHTML = ''; // Wipe pre-existing configuration list
+
+            bodies.forEach((body, index) => {
+                const row = document.createElement('div');
+                row.className = `p-3 bg-gray-900 border border-gray-800 rounded flex flex-col space-y-2 transition duration-200`;
+                row.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-3 h-3 rounded-full" style="background-color: ${body.color.main}"></span>
+                            <span class="text-xs font-semibold text-gray-200">${body.name}</span>
+                        </div>
+                        <span class="text-[10px] text-gray-400 font-mono">Mass Adjust</span>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <input type="range" min="0.05" max="10" step="0.05" value="${body.mass}" 
+                            class="w-full accent-indigo-500 bg-gray-800 h-1.5 rounded-lg cursor-pointer" 
+                            id="mass-input-${index}">
+                        <span id="mass-label-${index}" class="text-xs font-mono w-10 text-right">${body.mass.toFixed(2)}</span>
+                    </div>
+                `;
+                container.appendChild(row);
+
+                // Add interactive listener to input slider dynamic element
+                const slider = document.getElementById(`mass-input-${index}`);
+                slider.addEventListener('input', (e) => {
+                    const newMass = parseFloat(e.target.value);
+                    bodies[index].mass = newMass;
+                    document.getElementById(`mass-label-${index}`).textContent = newMass.toFixed(2);
+                    calculateEnergy(); // Force fresh metric diagnostic evaluation
+                });
+            });
+        }
+
+        // Preset state initialization
+        function loadPreset(presetKey) {
+            currentPresetName = presetKey;
+            const config = presets[presetKey];
+            if (!config) return;
+
+            // Stop simulation run temporarily
+            setPlayState(false);
+
+            // Recreate body collection deep clone
+            bodies = config.bodies.map(b => ({
+                x: b.x,
+                y: b.y,
+                vx: b.vx,
+                vy: b.vy,
+                mass: b.mass,
+                color: b.color,
+                name: b.name,
+                trail: [] // Clean history trace points container
+            }));
+
+            // Auto adapt camera view scale configuration parameters
+            zoom = config.zoom;
+            pan = { x: 0, y: 0 };
+
+            // Synchronize control panel UI variables
+            updateSidebarConfigurationList();
+            
+            // Recenter elements to baseline relative COM position
+            zeroBarycenterMomentum();
+
+            // Store initial metric system configuration energy values
+            initialSystemEnergy = null;
+            calculateEnergy();
+            initialSystemEnergy = calculateEnergy();
+
+            // Clear visual button active styling
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.classList.remove('border-indigo-500', 'bg-indigo-950/20');
+            });
+            // Highlight selected button
+            const activeBtn = Array.from(document.querySelectorAll('.preset-btn')).find(b => b.textContent.includes(config.name === 'figure8' ? 'Figure-8' : config.name === 'lagrange' ? 'Lagrangian' : config.name === 'chaotic' ? 'Chaotic' : config.name === 'binary_planet' ? 'Double' : config.name === 'golden_ratio' ? 'Golden' : 'Barycentric'));
+            if(activeBtn) {
+                activeBtn.classList.add('border-indigo-500', 'bg-indigo-950/20');
+            }
+
+            // Begin execution run
+            setPlayState(true);
+        }
+
+        function restartCurrentPreset() {
+            loadPreset(currentPresetName);
+        }
+
+        // Compute barycentric parameters to zero total system momentum offset
+        function zeroBarycenterMomentum() {
+            let totalMass = 0;
+            let sumX = 0, sumY = 0;
+            let sumVX = 0, sumVY = 0;
+
+            bodies.forEach(b => {
+                totalMass += b.mass;
+                sumX += b.x * b.mass;
+                sumY += b.y * b.mass;
+                sumVX += b.vx * b.mass;
+                sumVY += b.vy * b.mass;
+            });
+
+            if (totalMass === 0) return;
+
+            // Deduct system speed offset to freeze center frame of reference drift
+            const avgVX = sumVX / totalMass;
+            const avgVY = sumVY / totalMass;
+
+            bodies.forEach(b => {
+                b.vx -= avgVX;
+                b.vy -= avgVY;
+            });
+        }
+
+        // Dynamic State Play Controllers
+        function togglePlay() {
+            setPlayState(!isPlaying);
+        }
+
+        function setPlayState(play) {
+            isPlaying = play;
+            const icon = document.getElementById('play-icon');
+            const txt = document.getElementById('play-text');
+            const statusLabel = document.getElementById('status-label');
+
+            if (isPlaying) {
+                icon.className = 'fa-solid fa-pause';
+                txt.textContent = 'Pause';
+                statusLabel.textContent = 'Simulation Active';
+                statusLabel.parentElement.children[0].classList.add('bg-emerald-500');
+                statusLabel.parentElement.children[0].classList.remove('bg-amber-500');
+            } else {
+                icon.className = 'fa-solid fa-play';
+                txt.textContent = 'Run';
+                statusLabel.textContent = 'Simulation Paused';
+                statusLabel.parentElement.children[0].classList.remove('bg-emerald-500');
+                statusLabel.parentElement.children[0].classList.add('bg-amber-500');
+            }
+        }
+
+        function toggleVectors() {
+            drawVectors = !drawVectors;
+            document.getElementById('vector-toggle-text').textContent = drawVectors ? 'Hide Vectors' : 'Show Vectors';
+            const btn = document.getElementById('btn-vector');
+            if(drawVectors) {
+                btn.classList.add('bg-gray-900/95');
+                btn.classList.remove('bg-indigo-950/40', 'border-indigo-800');
+            } else {
+                btn.classList.remove('bg-gray-900/95');
+                btn.classList.add('bg-indigo-950/40', 'border-indigo-800');
+            }
+        }
+
+        function toggleTrailsDisplay() {
+            drawTrails = !drawTrails;
+            document.getElementById('trail-toggle-text').textContent = drawTrails ? 'Hide Trails' : 'Show Trails';
+            const btn = document.getElementById('btn-trail-disp');
+            if(drawTrails) {
+                btn.classList.add('bg-gray-900/95');
+                btn.classList.remove('bg-rose-950/40', 'border-rose-800');
+            } else {
+                btn.classList.remove('bg-gray-900/95');
+                btn.classList.add('bg-rose-950/40', 'border-rose-800');
+            }
+        }
+
+        function clearTrails() {
+            bodies.forEach(b => b.trail = []);
+        }
+
+        function recenter() {
+            // Find COM position in physics space
+            let totalMass = 0;
+            let sumX = 0, sumY = 0;
+            bodies.forEach(b => {
+                totalMass += b.mass;
+                sumX += b.x * b.mass;
+                sumY += b.y * b.mass;
+            });
+
+            if (totalMass > 0) {
+                const comX = sumX / totalMass;
+                const comY = sumY / totalMass;
+                // Shift camera target coordinates directly
+                pan = { x: -comX, y: -comY };
+            }
+        }
+
+        // Coordinate space mapping routines (Normalized space centered around barycenter)
+        function toCanvasCoords(physX, physY) {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const cx = centerX + (physX + pan.x) * zoom;
+            const cy = centerY + (physY + pan.y) * zoom;
+            return { x: cx, y: cy };
+        }
+
+        function toPhysicsCoords(canvasX, canvasY) {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const px = (canvasX - centerX) / zoom - pan.x;
+            const py = (canvasY - centerY) / zoom - pan.y;
+            return { x: px, y: py };
+        }
+
+        // Real-time Physics Engine Logic
+        // Runge-Kutta 4th Order (RK4) ODE Integration with high substepping
+        function updatePhysics() {
+            const numBodies = bodies.length;
+            const stepSize = dt;
+
+            // Pairwise acceleration helper calculation routine
+            function getAccelerations(positions) {
+                const acc = Array.from({ length: numBodies }, () => ({ x: 0, y: 0 }));
+                // Softening factor to prevent infinite singularity forces at extreme proximities
+                const epsilonSq = 0.001; 
+
+                for (let i = 0; i < numBodies; i++) {
+                    for (let j = i + 1; j < numBodies; j++) {
+                        const dx = positions[j].x - positions[i].x;
+                        const dy = positions[j].y - positions[i].y;
+                        const distSq = dx * dx + dy * dy + epsilonSq;
+                        const dist = Math.sqrt(distSq);
+                        
+                        // Force scalar: F = G * m1 * m2 / (distSq)
+                        // Acceleration: a = F / m -> a_i = G * m_j / distSq
+                        const fScalarCommon = G / (distSq * dist);
+
+                        acc[i].x += fScalarCommon * bodies[j].mass * dx;
+                        acc[i].y += fScalarCommon * bodies[j].mass * dy;
+
+                        acc[j].x -= fScalarCommon * bodies[i].mass * dx;
+                        acc[j].y -= fScalarCommon * bodies[i].mass * dy;
+                    }
+                }
+                return acc;
+            }
+
+            // Standard substepping framework loop
+            for (let step = 0; step < subSteps; step++) {
+                // Keep references
+                const pos = bodies.map(b => ({ x: b.x, y: b.y }));
+                const vel = bodies.map(b => ({ x: b.vx, y: b.vy }));
+
+                // RK4 Stage 1 evaluations
+                const k1_v = getAccelerations(pos);
+                const k1_x = vel;
+
+                // RK4 Stage 2 evaluations
+                const pos2 = pos.map((p, i) => ({ x: p.x + 0.5 * stepSize * k1_x[i].x, y: p.y + 0.5 * stepSize * k1_x[i].y }));
+                const vel2 = vel.map((v, i) => ({ x: v.x + 0.5 * stepSize * k1_v[i].x, y: v.y + 0.5 * stepSize * k1_v[i].y }));
+                const k2_v = getAccelerations(pos2);
+                const k2_x = vel2;
+
+                // RK4 Stage 3 evaluations
+                const pos3 = pos.map((p, i) => ({ x: p.x + 0.5 * stepSize * k2_x[i].x, y: p.y + 0.5 * stepSize * k2_x[i].y }));
+                const vel3 = vel.map((v, i) => ({ x: v.x + 0.5 * stepSize * k2_v[i].x, y: v.y + 0.5 * stepSize * k2_v[i].y }));
+                const k3_v = getAccelerations(pos3);
+                const k3_x = vel3;
+
+                // RK4 Stage 4 evaluations
+                const pos4 = pos.map((p, i) => ({ x: p.x + stepSize * k3_x[i].x, y: p.y + stepSize * k3_x[i].y }));
+                const vel4 = vel.map((v, i) => ({ x: v.x + stepSize * k3_v[i].x, y: v.y + stepSize * k3_v[i].y }));
+                const k4_v = getAccelerations(pos4);
+                const k4_x = vel4;
+
+                // Combine stages to form final integrated updates
+                for (let i = 0; i < numBodies; i++) {
+                    // Update positions
+                    bodies[i].x += (stepSize / 6) * (k1_x[i].x + 2 * k2_x[i].x + 2 * k3_x[i].x + k4_x[i].x);
+                    bodies[i].y += (stepSize / 6) * (k1_x[i].y + 2 * k2_x[i].y + 2 * k3_x[i].y + k4_x[i].y);
+
+                    // Update velocities
+                    bodies[i].vx += (stepSize / 6) * (k1_v[i].x + 2 * k2_v[i].x + 2 * k3_v[i].x + k4_v[i].x);
+                    bodies[i].vy += (stepSize / 6) * (k1_v[i].y + 2 * k2_v[i].y + 2 * k3_v[i].y + k4_v[i].y);
+                }
+            }
+
+            // Track state history coordinates inside trail traces array
+            bodies.forEach(b => {
+                b.trail.push({ x: b.x, y: b.y });
+                if (b.trail.length > maxTrailPoints) {
+                    b.trail.shift();
+                }
+            });
+        }
+
+        // System Telemetry Diagnostics Computations
+        function calculateEnergy() {
+            let ke = 0;
+            let pe = 0;
+            const numBodies = bodies.length;
+
+            for (let i = 0; i < numBodies; i++) {
+                const bI = bodies[i];
+                const speedSq = bI.vx * bI.vx + bI.vy * bI.vy;
+                ke += 0.5 * bI.mass * speedSq;
+
+                for (let j = i + 1; j < numBodies; j++) {
+                    const bJ = bodies[j];
+                    const dx = bJ.x - bI.x;
+                    const dy = bJ.y - bI.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist > 0.0001) {
+                        pe -= (G * bI.mass * bJ.mass) / dist;
+                    }
+                }
+            }
+
+            const totalEnergy = ke + pe;
+
+            // Render live text data metrics updates
+            document.getElementById('metric-ke').textContent = ke.toFixed(5);
+            document.getElementById('metric-pe').textContent = pe.toFixed(5);
+            document.getElementById('metric-te').textContent = totalEnergy.toFixed(5);
+
+            if (initialSystemEnergy === null) {
+                initialSystemEnergy = totalEnergy;
+            }
+
+            // Calculate conservation percentage drift error margins
+            const driftPercent = initialSystemEnergy !== 0 
+                ? Math.abs((totalEnergy - initialSystemEnergy) / initialSystemEnergy) * 100 
+                : 0;
+
+            const driftEl = document.getElementById('metric-drift');
+            driftEl.textContent = `Drift: ${driftPercent.toFixed(4)}%`;
+            if (driftPercent > 1) {
+                driftEl.className = "text-[10px] text-red-400 font-semibold";
+            } else if (driftPercent > 0.1) {
+                driftEl.className = "text-[10px] text-amber-400";
+            } else {
+                driftEl.className = "text-[10px] text-emerald-400";
+            }
+
+            return totalEnergy;
+        }
+
+        // Draw Canvas Graphics
+        function renderScene() {
+            // Space depth clearing step
+            ctx.fillStyle = '#030712';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw clean background grid structure lines
+            drawSpaceGrid();
+
+            // Trace trajectory orbits trails mapping
+            if (drawTrails) {
+                bodies.forEach((body) => {
+                    if (body.trail.length < 2) return;
+
+                    ctx.beginPath();
+                    const pStart = toCanvasCoords(body.trail[0].x, body.trail[0].y);
+                    ctx.moveTo(pStart.x, pStart.y);
+
+                    for (let k = 1; k < body.trail.length; k++) {
+                        const pt = toCanvasCoords(body.trail[k].x, body.trail[k].y);
+                        ctx.lineTo(pt.x, pt.y);
+                    }
+
+                    ctx.strokeStyle = body.color.path;
+                    ctx.lineWidth = 1.75;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                    ctx.stroke();
+                });
+            }
+
+            // Render barycenter indicator reference
+            drawBarycenterCrosshair();
+
+            // Draw individual orbital items structures
+            bodies.forEach((body, index) => {
+                const pos = toCanvasCoords(body.x, body.y);
+                const radius = Math.max(5, 5 + Math.pow(body.mass, 0.33) * 5); // Volume sizing scaling base on mass params
+
+                // Draw Vector arrow line (velocity direction indicators)
+                if (drawVectors) {
+                    const arrowScale = 60; // Visual helper length constant
+                    const vectorTarget = toCanvasCoords(body.x + body.vx, body.y + body.vy);
+
+                    // Compute vector arrow properties for interactive adjust targets
+                    const dx = vectorTarget.x - pos.x;
+                    const dy = vectorTarget.y - pos.y;
+                    const angle = Math.atan2(dy, dx);
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(pos.x, pos.y);
+                    ctx.lineTo(vectorTarget.x, vectorTarget.y);
+                    ctx.strokeStyle = index === hoveredVectorIndex ? '#e0f2fe' : body.color.main;
+                    ctx.lineWidth = index === hoveredVectorIndex ? 3 : 1.5;
+                    ctx.stroke();
+
+                    // Arrowhead structure draw routine
+                    ctx.beginPath();
+                    ctx.moveTo(vectorTarget.x, vectorTarget.y);
+                    ctx.lineTo(vectorTarget.x - 8 * Math.cos(angle - Math.PI/6), vectorTarget.y - 8 * Math.sin(angle - Math.PI/6));
+                    ctx.lineTo(vectorTarget.x - 8 * Math.cos(angle + Math.PI/6), vectorTarget.y - 8 * Math.sin(angle + Math.PI/6));
+                    ctx.closePath();
+                    ctx.fillStyle = index === hoveredVectorIndex ? '#e0f2fe' : body.color.main;
+                    ctx.fill();
+                }
+
+                // Inner Star Core Draw Gradient setup
+                const gradient = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, radius * 3);
+                gradient.addColorStop(0, '#ffffff');
+                gradient.addColorStop(0.15, body.color.main);
+                gradient.addColorStop(0.5, body.color.glow);
+                gradient.addColorStop(1, 'rgba(3, 7, 18, 0)');
+
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y, radius * 3, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+
+                // Core body frame line highlight boundaries on hover conditions
+                if (index === hoveredBodyIndex || index === activeDragIndex) {
+                    ctx.beginPath();
+                    ctx.arc(pos.x, pos.y, radius + 2, 0, Math.PI * 2);
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                }
+
+                // Render dynamic text identification metadata above star structures
+                ctx.fillStyle = '#9ca3af';
+                ctx.font = '10px monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${body.name} (${body.mass.toFixed(2)}M)`, pos.x, pos.y - radius - 10);
+            });
+        }
+
+        // Reference visual helper systems
+        function drawSpaceGrid() {
+            ctx.strokeStyle = '#111827';
+            ctx.lineWidth = 1.0;
+            
+            const gridSpacing = zoom * 0.5; // Physics step spacing mapping
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            // Generate panning grid reference markers
+            const startX = ((pan.x * zoom) % gridSpacing) - gridSpacing;
+            const startY = ((pan.y * zoom) % gridSpacing) - gridSpacing;
+
+            for (let x = startX; x < canvas.width; x += gridSpacing) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+
+            for (let y = startY; y < canvas.height; y += gridSpacing) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+        }
+
+        function drawBarycenterCrosshair() {
+            // Find system average barycenter coordinates
+            let totalMass = 0;
+            let sumX = 0, sumY = 0;
+            bodies.forEach(b => {
+                totalMass += b.mass;
+                sumX += b.x * b.mass;
+                sumY += b.y * b.mass;
+            });
+
+            if (totalMass > 0) {
+                const comX = sumX / totalMass;
+                const comY = sumY / totalMass;
+                const pos = toCanvasCoords(comX, comY);
+
+                ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(pos.x - 10, pos.y);
+                ctx.lineTo(pos.x + 10, pos.y);
+                ctx.moveTo(pos.x, pos.y - 10);
+                ctx.lineTo(pos.x, pos.y + 10);
+                ctx.stroke();
+
+                ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                ctx.font = '9px system-ui';
+                ctx.textAlign = 'left';
+                ctx.fillText("Barycenter (COM)", pos.x + 12, pos.y + 3);
+            }
+        }
+
+        // Mouse Controls Setup & Input Normalization Handlers
+        function setupInteraction() {
+            // Mouse Wheel Zoom mapping
+            canvas.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const zoomFactor = 1.1;
+                
+                // Keep cursor invariant physics tracking reference
+                const mousePos = { x: e.clientX - canvas.getBoundingClientRect().left, y: e.clientY - canvas.getBoundingClientRect().top };
+                const physBefore = toPhysicsCoords(mousePos.x, mousePos.y);
+
+                if (e.deltaY < 0) {
+                    zoom *= zoomFactor;
+                } else {
+                    zoom /= zoomFactor;
+                }
+
+                // Minimum-Maximum thresholds constraints clamping
+                zoom = Math.min(Math.max(zoom, 10), 1000);
+
+                // Readjust pan parameters to preserve spatial focus location targeting
+                const physAfter = toPhysicsCoords(mousePos.x, mousePos.y);
+                pan.x += (physAfter.x - physBefore.x);
+                pan.y += (physAfter.y - physBefore.y);
+
+                updateTelemetryDisplay();
+            }, { passive: false });
+
+            // Pointer Action Click Events Routing
+            canvas.addEventListener('mousedown', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+
+                isMouseDown = true;
+                clickStartPos = { x: mouseX, y: mouseY };
+
+                // Check collisions with draggable elements targets
+                const clickedInfo = checkProximities(mouseX, mouseY);
+
+                if (clickedInfo.vectorIndex !== -1 && drawVectors) {
+                    activeVectorIndex = clickedInfo.vectorIndex;
+                    setPlayState(false);
+                } else if (clickedInfo.bodyIndex !== -1) {
+                    activeDragIndex = clickedInfo.bodyIndex;
+                    setPlayState(false);
+                } else {
+                    // Default to background translation (Panning frame sequence)
+                    isDraggingCanvas = true;
+                    dragStart = { x: mouseX, y: mouseY };
+                }
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+
+                // Track continuous target properties dynamic hovered conditions
+                const hits = checkProximities(mouseX, mouseY);
+                hoveredBodyIndex = hits.bodyIndex;
+                hoveredVectorIndex = hits.vectorIndex;
+
+                if (isMouseDown) {
+                    if (activeDragIndex !== -1) {
+                        const physCoords = toPhysicsCoords(mouseX, mouseY);
+                        bodies[activeDragIndex].x = physCoords.x;
+                        bodies[activeDragIndex].y = physCoords.y;
+                        bodies[activeDragIndex].trail = []; // Flush old trail points during layout shift
+                        calculateEnergy();
+                    } else if (activeVectorIndex !== -1 && drawVectors) {
+                        const physTarget = toPhysicsCoords(mouseX, mouseY);
+                        const bodyRef = bodies[activeVectorIndex];
+                        bodyRef.vx = physTarget.x - bodyRef.x;
+                        bodyRef.vy = physTarget.y - bodyRef.y;
+                        calculateEnergy();
+                    } else if (isDraggingCanvas) {
+                        // Translation transformation shifting
+                        const dx = mouseX - dragStart.x;
+                        const dy = mouseY - dragStart.y;
+                        pan.x += dx / zoom;
+                        pan.y += dy / zoom;
+                        dragStart = { x: mouseX, y: mouseY };
+                        updateTelemetryDisplay();
+                    }
+                }
+            });
+
+            window.addEventListener('mouseup', (e) => {
+                if (isMouseDown) {
+                    const rect = canvas.getBoundingClientRect();
+                    const mouseX = e.clientX - rect.left;
+                    const mouseY = e.clientY - rect.top;
+                    const dist = Math.sqrt(Math.pow(mouseX - clickStartPos.x, 2) + Math.pow(mouseY - clickStartPos.y, 2));
+                    
+                    // If the user clicked (minimal movement) on empty space, toggle play/pause
+                    if (dist < 5 && activeDragIndex === -1 && activeVectorIndex === -1) {
+                        const clickedInfo = checkProximities(mouseX, mouseY);
+                        if (clickedInfo.bodyIndex === -1 && clickedInfo.vectorIndex === -1) {
+                            togglePlay();
+                        }
+                    }
+                }
+                isMouseDown = false;
+                activeDragIndex = -1;
+                activeVectorIndex = -1;
+                isDraggingCanvas = false;
+            });
+
+            // Touch support
+            canvas.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    const rect = canvas.getBoundingClientRect();
+                    const touchX = e.touches[0].clientX - rect.left;
+                    const touchY = e.touches[0].clientY - rect.top;
+                    
+                    isMouseDown = true;
+                    clickStartPos = { x: touchX, y: touchY };
+                    const clickedInfo = checkProximities(touchX, touchY);
+
+                    if (clickedInfo.vectorIndex !== -1 && drawVectors) {
+                        activeVectorIndex = clickedInfo.vectorIndex;
+                        setPlayState(false);
+                    } else if (clickedInfo.bodyIndex !== -1) {
+                        activeDragIndex = clickedInfo.bodyIndex;
+                        setPlayState(false);
+                    } else {
+                        isDraggingCanvas = true;
+                        dragStart = { x: touchX, y: touchY };
+                    }
+                }
+            }, { passive: true });
+
+            canvas.addEventListener('touchmove', (e) => {
+                if (e.touches.length === 1 && isMouseDown) {
+                    const rect = canvas.getBoundingClientRect();
+                    const touchX = e.touches[0].clientX - rect.left;
+                    const touchY = e.touches[0].clientY - rect.top;
+
+                    if (activeDragIndex !== -1) {
+                        const physCoords = toPhysicsCoords(touchX, touchY);
+                        bodies[activeDragIndex].x = physCoords.x;
+                        bodies[activeDragIndex].y = physCoords.y;
+                        bodies[activeDragIndex].trail = [];
+                        calculateEnergy();
+                    } else if (activeVectorIndex !== -1 && drawVectors) {
+                        const physTarget = toPhysicsCoords(touchX, touchY);
+                        const bodyRef = bodies[activeVectorIndex];
+                        bodyRef.vx = physTarget.x - bodyRef.x;
+                        bodyRef.vy = physTarget.y - bodyRef.y;
+                        calculateEnergy();
+                    } else if (isDraggingCanvas) {
+                        const dx = touchX - dragStart.x;
+                        const dy = touchY - dragStart.y;
+                        pan.x += dx / zoom;
+                        pan.y += dy / zoom;
+                        dragStart = { x: touchX, y: touchY };
+                        updateTelemetryDisplay();
+                    }
+                }
+            }, { passive: true });
+
+            canvas.addEventListener('touchend', (e) => {
+                if (isMouseDown && e.changedTouches && e.changedTouches.length === 1) {
+                    const rect = canvas.getBoundingClientRect();
+                    const touchX = e.changedTouches[0].clientX - rect.left;
+                    const touchY = e.changedTouches[0].clientY - rect.top;
+                    const dist = Math.sqrt(Math.pow(touchX - clickStartPos.x, 2) + Math.pow(touchY - clickStartPos.y, 2));
+
+                    if (dist < 5 && activeDragIndex === -1 && activeVectorIndex === -1) {
+                        const clickedInfo = checkProximities(touchX, touchY);
+                        if (clickedInfo.bodyIndex === -1 && clickedInfo.vectorIndex === -1) {
+                            togglePlay();
+                        }
+                    }
+                }
+                isMouseDown = false;
+                activeDragIndex = -1;
+                activeVectorIndex = -1;
+                isDraggingCanvas = false;
+            });
+        }
+
+        // Proximities evaluator helper
+        function checkProximities(screenX, screenY) {
+            let bodyIndex = -1;
+            let vectorIndex = -1;
+
+            const clickThreshold = 18; // Canvas pixels range sensitivity
+
+            // Assess bodies click collision
+            for (let i = 0; i < bodies.length; i++) {
+                const bPos = toCanvasCoords(bodies[i].x, bodies[i].y);
+                const dx = screenX - bPos.x;
+                const dy = screenY - bPos.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const radius = Math.max(5, 5 + Math.pow(bodies[i].mass, 0.33) * 5);
+
+                if (dist <= radius + clickThreshold) {
+                    bodyIndex = i;
+                    break;
+                }
+            }
+
+            // Assess velocity tip vector handle interactions
+            if (drawVectors && bodyIndex === -1) {
+                for (let i = 0; i < bodies.length; i++) {
+                    const vTarget = toCanvasCoords(bodies[i].x + bodies[i].vx, bodies[i].y + bodies[i].vy);
+                    const dx = screenX - vTarget.x;
+                    const dy = screenY - vTarget.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist <= clickThreshold) {
+                        vectorIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            return { bodyIndex, vectorIndex };
+        }
+
+        function updateTelemetryDisplay() {
+            const el = document.getElementById('coords-display');
+            el.textContent = `Camera Zoom: ${Math.round(zoom)}% | Pan: (${pan.x.toFixed(2)}, ${pan.y.toFixed(2)})`;
+        }
+
+        // Standard Game / Frame Update loop routing
+        function loop() {
+            if (isPlaying) {
+                updatePhysics();
+                calculateEnergy();
+            }
+            renderScene();
+            requestAnimationFrame(loop);
+        }
+
+        // Trigger startup on window load sequence complete
+        window.onload = init;
+    </script>
+</body>
+</html>
